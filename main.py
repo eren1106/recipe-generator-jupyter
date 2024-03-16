@@ -1,6 +1,9 @@
 import streamlit as st
-from langchain.llms import HuggingFaceEndpoint
+import os
+from langchain_community.llms import HuggingFaceEndpoint
 from langchain import PromptTemplate, LLMChain
+# from dotenv import load_dotenv
+# load_dotenv()
 
 default_template = """
     You are a professional chef creating a new recipe.
@@ -18,7 +21,8 @@ default_template = """
 
 def generate_recipe(repo_id, api_key, template, dish_name):
   hub_llm = HuggingFaceEndpoint(
-    repo_id=repo_id, model_kwargs={"min_length": 512, "max_length": 1024}, token=api_key
+    # repo_id=repo_id, model_kwargs={"min_length": 512, "max_length": 1024, "token": api_key},
+      repo_id=repo_id, max_length=128, temperature=0.5, token=api_key
   )
   prompt = PromptTemplate(
     input_variables=["dish"],
@@ -31,6 +35,7 @@ st.title("Recipe Generator")
 
 with st.form("recipe_form"):
     api_key = st.text_input("Enter your API key:", type="password")
+    os.environ['HUGGINGFACEHUB_API_TOKEN'] = api_key
     repo_id = st.text_input("Enter Huggingface LLM Repo ID:", "mistralai/Mistral-7B-v0.1")
     template = st.text_area("Enter template:", default_template)
     dish_name = st.text_input("Enter the dish name:")
